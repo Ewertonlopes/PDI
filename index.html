@@ -531,7 +531,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </ul>
 </li>
 <li><a href="#_atividade_2_salvando_imagens">Atividade 2: Salvando Imagens</a></li>
-<li><a href="#_atividade_3_dividindo_imagens">Atividade 3: Dividindo Imagens</a></li>
+<li><a href="#_atividade_3_esteganografia_de_uma_imagem">Atividade 3: Esteganografia de uma imagem</a></li>
 </ul>
 </div>
 </div>
@@ -743,13 +743,68 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </div>
 </div>
 <div class="sect1">
-<h2 id="_atividade_3_dividindo_imagens">Atividade 3: Dividindo Imagens</h2>
+<h2 id="_atividade_3_esteganografia_de_uma_imagem">Atividade 3: Esteganografia de uma imagem</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Incluindo codigo do exemplo <a href="#exa_hello">[exa_hello]</a>.</p>
+<p>Partindo de uma imagem que possuía uma segunda imagem escondida, esta atividade retorna a manipulação de pixels. Dessa vez é necessário fazer o movimento contrário do qual foi feita para se esconder a imagem.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span></span><span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;iostream&gt;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;opencv2/opencv.hpp&gt;</span>
+
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">argc</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-kt">char</span><span class="tok-o">**</span><span class="tok-n">argv</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">  	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">imagemPortadora</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">imagemEscondida</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">;</span>
+<span class="tok-w"> 	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-w"> </span><span class="tok-n">valPortadora</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">valEscondida</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">;</span>
+<span class="tok-w">	</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">;</span>
+
+<span class="tok-w">	</span><span class="tok-n">imagemFinal</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imread</span><span class="tok-p">(</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">],</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">IMREAD_COLOR</span><span class="tok-p">);</span>
+
+<span class="tok-w">	</span><span class="tok-n">imagemPortadora</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">clone</span><span class="tok-p">();</span>
+<span class="tok-w">	</span><span class="tok-n">imagemEscondida</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">clone</span><span class="tok-p">();</span>
+
+<span class="tok-w">  	</span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">empty</span><span class="tok-p">())</span>
+<span class="tok-w">	</span><span class="tok-p">{</span>
+<span class="tok-w">    	</span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;imagem nao carregou corretamente&quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">endl</span><span class="tok-p">;</span>
+<span class="tok-w">    	</span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">-1</span><span class="tok-p">);</span>
+<span class="tok-w">  	</span><span class="tok-p">}</span>
+
+<span class="tok-w">  	</span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span>
+<span class="tok-w">	</span><span class="tok-p">{</span>
+<span class="tok-w">    	</span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">cols</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-o">++</span><span class="tok-p">)</span>
+<span class="tok-w">		</span><span class="tok-p">{</span>
+<span class="tok-w">			</span><span class="tok-n">valFinal</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">imagemFinal</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-p">);</span>
+
+<span class="tok-w">      		</span><span class="tok-n">valPortadora</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&gt;&gt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-p">;</span>
+<span class="tok-w">      		</span><span class="tok-n">valPortadora</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&gt;&gt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-p">;</span>
+<span class="tok-w">      		</span><span class="tok-n">valPortadora</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&gt;&gt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">nbits</span><span class="tok-p">;</span>
+
+<span class="tok-w">     		</span><span class="tok-n">valEscondida</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">8</span><span class="tok-o">-</span><span class="tok-n">nbits</span><span class="tok-p">);</span>
+<span class="tok-w">      		</span><span class="tok-n">valEscondida</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">8</span><span class="tok-o">-</span><span class="tok-n">nbits</span><span class="tok-p">);</span>
+<span class="tok-w">      		</span><span class="tok-n">valEscondida</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valFinal</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">8</span><span class="tok-o">-</span><span class="tok-n">nbits</span><span class="tok-p">);</span>
+
+<span class="tok-w">			</span><span class="tok-n">imagemPortadora</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-p">,</span><span class="tok-n">j</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valPortadora</span><span class="tok-p">;</span>
+<span class="tok-w">			</span><span class="tok-n">imagemEscondida</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-p">,</span><span class="tok-n">j</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">valEscondida</span><span class="tok-p">;</span>
+<span class="tok-w">    	</span><span class="tok-p">}</span>
+<span class="tok-w">  	</span><span class="tok-p">}</span>
+
+<span class="tok-w">	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;Portadora&quot;</span><span class="tok-p">,</span><span class="tok-n">imagemPortadora</span><span class="tok-p">);</span>
+<span class="tok-w">	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">();</span>
+<span class="tok-w">	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;Escondida&quot;</span><span class="tok-p">,</span><span class="tok-n">imagemEscondida</span><span class="tok-p">);</span>
+<span class="tok-w">  	</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">();</span>
+
+<span class="tok-w">  </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span>
+<span class="tok-p">}</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Exemplo de equacao</p>
+<p>O procedimento é simplesmente pegar os n dígitos mais significativos da imagem e separá-los para uma imagem e pegar os Nbytes - n dígitos menos significativos e colocá-los em uma outra imagem. Como estamos utilizando imagens de 1 byte e um n de 3 foi o suficiente para revelar a imagem escondida, temos então os 5 bits mais significativos da imagem separados dos 3 bits menos significativos. Assim podemos separar as duas imagens como pode ser visto na figura <a href="#fig_esteg">estego</a>.</p>
+</div>
+<div id="fig_esteg" class="imageblock">
+<div class="content">
+<img src="images/esteg.png" alt="esteg">
+</div>
+<div class="title">Figure 5. Imagem portadora e imagem escondida</div>
 </div>
 <div class="paragraph">
 <p>\$\int_a^b f(x) dx\$</p>
@@ -759,7 +814,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-30 13:37:30 -0300
+Last updated 2023-09-30 13:48:21 -0300
 </div>
 </div>
 <script type="text/x-mathjax-config">

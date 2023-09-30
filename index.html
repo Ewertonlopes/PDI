@@ -539,6 +539,8 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#_sensor_de_presença">Sensor de presença</a></li>
 </ul>
 </li>
+<li><a href="#_atividade_6_filtros_no_domínio_espacial">Atividade 6: Filtros no domínio espacial</a></li>
+<li><a href="#_atividade_6_filtros_espaciais_tilt_shift_digital">Atividade 6: Filtros Espaciais Tilt Shift Digital</a></li>
 </ul>
 </div>
 </div>
@@ -1224,8 +1226,178 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </div>
 <div class="title">Figure 8. Saída do Programa de Sensor de Movimento</div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_atividade_6_filtros_no_domínio_espacial">Atividade 6: Filtros no domínio espacial</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>\$\int_a^b f(x) dx\$</p>
+<p>Para o desenvolvimento da atividade proposta basta que façamos uma segunda máscara e apliquemos em séria com a máscara aplicada anteriormente. Com a utilização do botão z como forma de aplicar o laplaciano a qualquer filtro colocado anteriormente podemos ver a aplicação posterior do lapalaciano a qualquer filtro. O laplaciano é um detector de bordas e por isso deve evidenciar as bordas de quaisquer figuras. Abaixo podemos ver o código completo que faz esse trabalho.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span></span><span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;iostream&gt;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;opencv2/opencv.hpp&gt;</span>
+
+<span class="tok-kt">void</span><span class="tok-w"> </span><span class="tok-nf">printmask</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-o">&amp;</span><span class="tok-n">m</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">  </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">m</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">().</span><span class="tok-n">height</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">    </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">m</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">().</span><span class="tok-n">width</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-o">++</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">      </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">m</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">float</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;,&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">    </span><span class="tok-p">}</span>
+<span class="tok-w">    </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-p">}</span>
+<span class="tok-p">}</span>
+
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-kt">char</span><span class="tok-w"> </span><span class="tok-o">**</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">VideoCapture</span><span class="tok-w"> </span><span class="tok-n">cap</span><span class="tok-p">;</span><span class="tok-w">  </span><span class="tok-c1">// open the default camera</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">media</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span>
+<span class="tok-w">                   </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.1111</span><span class="tok-p">};</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">gauss</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mf">0.0625</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.125</span><span class="tok-p">,</span><span class="tok-w">  </span><span class="tok-mf">0.0625</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.125</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.25</span><span class="tok-p">,</span>
+<span class="tok-w">                   </span><span class="tok-mf">0.125</span><span class="tok-p">,</span><span class="tok-w">  </span><span class="tok-mf">0.0625</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">0.125</span><span class="tok-p">,</span><span class="tok-w">  </span><span class="tok-mf">0.0625</span><span class="tok-p">};</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">horizontal</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-2</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">2</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">};</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">vertical</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-2</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">2</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">};</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">laplacian</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">4</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">};</span>
+<span class="tok-w">  </span><span class="tok-kt">float</span><span class="tok-w"> </span><span class="tok-n">boost</span><span class="tok-p">[]</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mf">5.2</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">};</span>
+
+<span class="tok-w">  </span><span class="tok-kt">bool</span><span class="tok-w"> </span><span class="tok-n">laplacegoogles</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-nb">false</span><span class="tok-p">;</span>
+
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">frame</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">framegray</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frame32f</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frameFiltered</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frameFinal</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">mask</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">mask2</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">result</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-kt">double</span><span class="tok-w"> </span><span class="tok-n">width</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">height</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">absolut</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-kt">char</span><span class="tok-w"> </span><span class="tok-n">key</span><span class="tok-p">;</span>
+
+<span class="tok-w">  </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">open</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-o">!</span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">isOpened</span><span class="tok-p">())</span><span class="tok-w">  </span><span class="tok-c1">// check if we succeeded</span>
+<span class="tok-w">    </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">;</span>
+
+<span class="tok-w">  </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FRAME_WIDTH</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">640</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FRAME_HEIGHT</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">480</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">width</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FRAME_WIDTH</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">height</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FRAME_HEIGHT</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;largura=&quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">width</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;altura =&quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">height</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;fps    =&quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FPS</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;format =&quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">cap</span><span class="tok-p">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">CAP_PROP_FORMAT</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">namedWindow</span><span class="tok-p">(</span><span class="tok-s">&quot;filtroespacial&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">WINDOW_NORMAL</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">namedWindow</span><span class="tok-p">(</span><span class="tok-s">&quot;original&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">WINDOW_NORMAL</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">media</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">mask2</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">media</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-n">absolut</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">;</span><span class="tok-w">  </span><span class="tok-c1">// calcs abs of the image</span>
+
+<span class="tok-w">  </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(;;)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">    </span><span class="tok-n">cap</span><span class="tok-w"> </span><span class="tok-o">&gt;&gt;</span><span class="tok-w"> </span><span class="tok-n">frame</span><span class="tok-p">;</span><span class="tok-w">  </span><span class="tok-c1">// get a new frame from camera</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">cvtColor</span><span class="tok-p">(</span><span class="tok-n">frame</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">framegray</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">COLOR_BGR2GRAY</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">flip</span><span class="tok-p">(</span><span class="tok-n">framegray</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">framegray</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;original&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">framegray</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">framegray</span><span class="tok-p">.</span><span class="tok-n">convertTo</span><span class="tok-p">(</span><span class="tok-n">frame32f</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">filter2D</span><span class="tok-p">(</span><span class="tok-n">frame32f</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frameFiltered</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frame32f</span><span class="tok-p">.</span><span class="tok-n">depth</span><span class="tok-p">(),</span>
+<span class="tok-w">    </span><span class="tok-n">mask</span><span class="tok-p">,</span>
+<span class="tok-w">                 </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Point</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">),</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">filter2D</span><span class="tok-p">(</span><span class="tok-n">frameFiltered</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frameFinal</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">frameFiltered</span><span class="tok-p">.</span><span class="tok-n">depth</span><span class="tok-p">(),</span>
+<span class="tok-w">    </span><span class="tok-n">mask2</span><span class="tok-p">,</span>
+<span class="tok-w">                </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Point</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-mi">1</span><span class="tok-p">),</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">absolut</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">      </span><span class="tok-n">frameFinal</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">abs</span><span class="tok-p">(</span><span class="tok-n">frameFinal</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-p">}</span>
+
+<span class="tok-w">    </span><span class="tok-n">frameFinal</span><span class="tok-p">.</span><span class="tok-n">convertTo</span><span class="tok-p">(</span><span class="tok-n">result</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_8U</span><span class="tok-p">);</span>
+
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;filtroespacial&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">result</span><span class="tok-p">);</span>
+
+<span class="tok-w">    </span><span class="tok-n">key</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">char</span><span class="tok-p">)</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">(</span><span class="tok-mi">10</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-w"> </span><span class="tok-o">==</span><span class="tok-w"> </span><span class="tok-mi">27</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">break</span><span class="tok-p">;</span><span class="tok-w">  </span><span class="tok-c1">// esc pressed!</span>
+<span class="tok-w">    </span><span class="tok-k">switch</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;a&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">absolut</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-o">!</span><span class="tok-n">absolut</span><span class="tok-p">;</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;m&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">media</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">printmask</span><span class="tok-p">(</span><span class="tok-n">mask</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;g&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">gauss</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">printmask</span><span class="tok-p">(</span><span class="tok-n">mask</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;h&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">horizontal</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">printmask</span><span class="tok-p">(</span><span class="tok-n">mask</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;v&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">vertical</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">printmask</span><span class="tok-p">(</span><span class="tok-n">mask</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;l&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">laplacian</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">printmask</span><span class="tok-p">(</span><span class="tok-n">mask</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;b&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">mask</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">boost</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">case</span><span class="tok-w"> </span><span class="tok-sc">&#39;z&#39;</span><span class="tok-p">:</span>
+<span class="tok-w">        </span><span class="tok-n">laplacegoogles</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-o">!</span><span class="tok-n">laplacegoogles</span><span class="tok-p">;</span>
+<span class="tok-w">        </span><span class="tok-k">if</span><span class="tok-p">(</span><span class="tok-n">laplacegoogles</span><span class="tok-p">)</span>
+<span class="tok-w">        </span><span class="tok-p">{</span>
+<span class="tok-w">            </span><span class="tok-n">mask2</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">laplacian</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-p">}</span>
+<span class="tok-w">        </span><span class="tok-k">else</span>
+<span class="tok-w">        </span><span class="tok-p">{</span>
+<span class="tok-w">            </span><span class="tok-n">mask2</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_32F</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">media</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-p">}</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">      </span><span class="tok-k">default</span><span class="tok-o">:</span>
+<span class="tok-w">        </span><span class="tok-k">break</span><span class="tok-p">;</span>
+<span class="tok-w">    </span><span class="tok-p">}</span>
+<span class="tok-w">  </span><span class="tok-p">}</span>
+<span class="tok-w">  </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Com a aplicação de um filtro detector de bordas podemos ver que a saída na figura <a href="#fig_laplace">laplace</a> apenas com o filtro de laplace temos uma detecção das bordas em todas direções.</p>
+</div>
+<div id="fig_laplace" class="imageblock">
+<div class="content">
+<img src="images/laplace.png" alt="laplace">
+</div>
+<div class="title">Figure 9. Saída do filtro laplaciano</div>
+</div>
+<div class="paragraph">
+<p>Porém, com a utilização de um filtro de gauss e um laplaciano, como na figura <a href="#fig_glaplace">glaplace</a>, temos uma acentuação ainda maior das bordas.</p>
+</div>
+<div id="fig_glaplace" class="imageblock">
+<div class="content">
+<img src="images/laplacegauss.png" alt="laplacegauss">
+</div>
+<div class="title">Figure 10. Saída do filtro Gauss-laplaciano</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_atividade_6_filtros_espaciais_tilt_shift_digital">Atividade 6: Filtros Espaciais Tilt Shift Digital</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Para o desenvolvimento da atividade proposta basta que façamos uma segunda máscara e apliquemos em séria com a máscara aplicada anteriormente. Com a utilização do botão z como forma de aplicar o laplaciano a qualquer filtro colocado anteriormente podemos ver a aplicação posterior do lapalaciano a qualquer filtro. O laplaciano é um detector de bordas e por isso deve evidenciar as bordas de quaisquer figuras. Abaixo podemos ver o código completo que faz esse trabalho.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"></code></pre>
+</div>
+</div>
+<div class="videoblock">
+<div class="content">
+<video src="videos/dronenatal.mp4" controls>
+Your browser does not support the video tag.
+</video>
 </div>
 </div>
 </div>
@@ -1233,7 +1405,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-30 14:30:36 -0300
+Last updated 2023-09-30 14:54:50 -0300
 </div>
 </div>
 <script type="text/x-mathjax-config">

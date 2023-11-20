@@ -551,6 +551,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#_atividade_9_filtro_homomórfico">Atividade 9: Filtro Homomórfico</a></li>
 <li><a href="#_atividade_10_algoritmo_de_arte_pontilhista">Atividade 10: Algoritmo de Arte Pontilhista</a></li>
 <li><a href="#_atividade_11_algoritmo_de_kmeans">Atividade 11: Algoritmo de Kmeans</a></li>
+<li><a href="#_atividade_12_preprocessamento_de_7_segmentos">Atividade 12: Preprocessamento de 7 Segmentos</a></li>
 </ul>
 </div>
 </div>
@@ -2102,10 +2103,71 @@ Your browser does not support the video tag.
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_atividade_12_preprocessamento_de_7_segmentos">Atividade 12: Preprocessamento de 7 Segmentos</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A leitura de um visor de 7 segmentos é óbvia para um ser humano em que as partes faltantes dos segmentos não gera perda de informação. Porém, para um computador, as partes faltantes dos segmentos é estritamente proibitiva para a compreensão correta da visão de máquina. Para resolver isso é necessário aplicar técnicas de pré-processamento tal como aplicar filtros morfológicos na imagem a fim de resolver os gaps de informação visual. Para as imagens apresentadas como nas imagens do <a href="#fig_visorig">Visor Original</a> abaixo.</p>
+</div>
+<div id="fig_visorig" class="imageblock">
+<div class="content">
+<img src="images/Imagens%20visor.png" alt="Imagens visor">
+</div>
+<div class="title">Figure 20. Imagens postas originalmente no visor</div>
+</div>
+<div class="paragraph">
+<p>Como resposta para o pré-processamento desta imagem se propôs duas aberturas. Uma com um retângulo do estilo (1x13) com coordenada x bastante elevada. Assim podendo fazer a ligação das linhas que separam os números. Essa abertura é suficiente para se melhorar a leitura dos dígitos, porém, como uma forma de melhoria se resolveu aplicar também uma abertura do estilo (3x1) que torna os números ainda melhores de ler. O código proposto se encontra logo abaixo.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span></span><span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;iostream&gt;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;opencv2/opencv.hpp&gt;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;opencv2/ximgproc.hpp&gt;</span>
+
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">argc</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-kt">char</span><span class="tok-o">**</span><span class="tok-w"> </span><span class="tok-n">argv</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">str</span><span class="tok-p">,</span><span class="tok-n">str2</span><span class="tok-p">;</span>
+
+<span class="tok-w">  </span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">argc</span><span class="tok-w"> </span><span class="tok-o">!=</span><span class="tok-w"> </span><span class="tok-mi">2</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">    </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;morfologia entrada saida</span><span class="tok-se">\n</span><span class="tok-s">&quot;</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-p">}</span>
+
+<span class="tok-w">  </span><span class="tok-n">image</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imread</span><span class="tok-p">(</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">],</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">IMREAD_UNCHANGED</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-k">if</span><span class="tok-p">(</span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">empty</span><span class="tok-p">())</span>
+<span class="tok-w">  </span><span class="tok-p">{</span>
+<span class="tok-w">    </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">cout</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-s">&quot;Erro ao carregar a imagem: &quot;</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-w"> </span><span class="tok-o">&lt;&lt;</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">endl</span><span class="tok-p">;</span>
+<span class="tok-w">    </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">-1</span><span class="tok-p">;</span>
+<span class="tok-w">  </span><span class="tok-p">}</span>
+
+<span class="tok-w">  </span><span class="tok-n">str</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">getStructuringElement</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">MORPH_RECT</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Size</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">13</span><span class="tok-p">));</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">morphologyEx</span><span class="tok-p">(</span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">MORPH_OPEN</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">str</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-n">str2</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">getStructuringElement</span><span class="tok-p">(</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">MORPH_RECT</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Size</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">));</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">morphologyEx</span><span class="tok-p">(</span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">MORPH_OPEN</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">str2</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;morfologia&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">);</span>
+<span class="tok-w">  </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+
+<span class="tok-w">  </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Com o programa resultante do código acima podemos aplicar o preprocessamento para cada imagem e temos o resultado como dado logo abaixo pela figura <a href="#fig_visorp">Visor Processado</a> :</p>
+</div>
+<div id="fig_visorp" class="imageblock">
+<div class="content">
+<img src="images/process.png" alt="process">
+</div>
+<div class="title">Figure 21. Imagens depois do processamento</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-11-20 10:09:24 -0300
+Last updated 2023-11-20 10:28:55 -0300
 </div>
 </div>
 <script type="text/x-mathjax-config">

@@ -549,6 +549,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#_unidade_2">------------ Unidade 2 ------------</a></li>
 <li><a href="#_atividade_8_magnitude_em_frequência">Atividade 8: Magnitude em Frequência</a></li>
 <li><a href="#_atividade_9_filtro_homomórfico">Atividade 9: Filtro Homomórfico</a></li>
+<li><a href="#_atividade_10_algoritmo_de_arte_pontilhista">Atividade 10: Algoritmo de Arte Pontilhista</a></li>
 </ul>
 </div>
 </div>
@@ -1916,10 +1917,105 @@ Your browser does not support the video tag.
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_atividade_10_algoritmo_de_arte_pontilhista">Atividade 10: Algoritmo de Arte Pontilhista</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A detecção de bordas é essencial para a análise de imagem de forma geral. Como uma forma de desenvolver a lógica desse tipo de algoritmo se resolveu aplicar os conhecimentos a produção de uma arte pontilhista a partir de uma imagem dada. Se optou então por um algoritmo bem curto, simples e efetivo na produção de imagens pontilhistas em RGB. O algoritmo se baseia na simples lógica:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Se define as repinturas e o nível de espalhamento da peça.</p>
+</li>
+<li>
+<p>Se faz a captura da imagem.</p>
+</li>
+<li>
+<p>Se começa a iteração dependendo no numero de repinturas.</p>
+</li>
+<li>
+<p>Aplicando o algoritmo de canny com limiar crescente a cada iteração.</p>
+</li>
+<li>
+<p>Se captura as cores presentes nos pontos de borda detectados.</p>
+</li>
+<li>
+<p>Se faz a pintura de pontos em uma posição proxima aleatoria dependente do espalhamento.</p>
+</li>
+<li>
+<p>Se reduz o tamanho do pincel a cada iteração para que os pontos de alto detalhe sejam melhor pintados.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>O código em c++ pode ser visto logo abaixo.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span></span><span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;iostream&gt;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&quot;opencv2/opencv.hpp&quot;</span>
+<span class="tok-cp">#include</span><span class="tok-w"> </span><span class="tok-cpf">&lt;thread&gt;</span>
+
+<span class="tok-cp">#define JITTER 3</span>
+<span class="tok-cp">#define PAINTINGS_OVER 10 </span><span class="tok-c1">//Numero de Pinturas sob Limites cada vez mais restritivos de CANNY</span>
+
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">width</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">height</span><span class="tok-p">;</span>
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">x</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">y</span><span class="tok-p">;</span>
+<span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">border</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">points</span><span class="tok-p">;</span>
+
+<span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">argc</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-kt">char</span><span class="tok-o">**</span><span class="tok-w"> </span><span class="tok-n">argv</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">    </span><span class="tok-n">image</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imread</span><span class="tok-p">(</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">],</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">IMREAD_COLOR</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">width</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">cols</span><span class="tok-p">;</span>
+<span class="tok-w">    </span><span class="tok-n">height</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">;</span>
+
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">namedWindow</span><span class="tok-p">(</span><span class="tok-s">&quot;Point&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-n">points</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-n">height</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">width</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">CV_8UC3</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Scalar</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">255</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">255</span><span class="tok-p">));</span>
+
+<span class="tok-w">    </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-w"> </span><span class="tok-o">&lt;=</span><span class="tok-w"> </span><span class="tok-mi">100</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-w"> </span><span class="tok-o">+=</span><span class="tok-w"> </span><span class="tok-mi">100</span><span class="tok-o">/</span><span class="tok-n">PAINTINGS_OVER</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">        </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Canny</span><span class="tok-p">(</span><span class="tok-n">image</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">border</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-mi">3</span><span class="tok-w"> </span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">height</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">            </span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">&lt;</span><span class="tok-w"> </span><span class="tok-n">width</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-o">++</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span>
+<span class="tok-w">                </span><span class="tok-k">if</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">border</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">uchar</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">==</span><span class="tok-w"> </span><span class="tok-mi">255</span><span class="tok-p">)</span>
+<span class="tok-w">                </span><span class="tok-p">{</span>
+<span class="tok-w">                    </span><span class="tok-n">x</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">i</span><span class="tok-w"> </span><span class="tok-o">+</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">rand</span><span class="tok-p">()</span><span class="tok-w"> </span><span class="tok-o">%</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-w"> </span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">JITTER</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">-</span><span class="tok-w"> </span><span class="tok-n">JITTER</span><span class="tok-w"> </span><span class="tok-o">+</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">;</span>
+<span class="tok-w">                    </span><span class="tok-n">y</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">j</span><span class="tok-w"> </span><span class="tok-o">+</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">rand</span><span class="tok-p">()</span><span class="tok-w"> </span><span class="tok-o">%</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-w"> </span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">JITTER</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-o">-</span><span class="tok-w"> </span><span class="tok-n">JITTER</span><span class="tok-w"> </span><span class="tok-o">+</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-p">;</span>
+
+<span class="tok-w">                    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-w"> </span><span class="tok-n">intensity</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">x</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">y</span><span class="tok-p">);</span>
+<span class="tok-w">                    </span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">blue</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">intensity</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">];</span>
+<span class="tok-w">                    </span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">green</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">intensity</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">];</span>
+<span class="tok-w">                    </span><span class="tok-kt">int</span><span class="tok-w"> </span><span class="tok-n">red</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">intensity</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">];</span>
+
+<span class="tok-w">                    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">circle</span><span class="tok-p">(</span><span class="tok-n">points</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Point</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">x</span><span class="tok-p">),</span><span class="tok-w"> </span><span class="tok-n">PAINTINGS_OVER</span><span class="tok-w"> </span><span class="tok-o">+</span><span class="tok-w"> </span><span class="tok-mi">1</span><span class="tok-w"> </span><span class="tok-o">-</span><span class="tok-w"> </span><span class="tok-n">h</span><span class="tok-w"> </span><span class="tok-o">/</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-mi">100</span><span class="tok-o">/</span><span class="tok-n">PAINTINGS_OVER</span><span class="tok-p">),</span><span class="tok-w"> </span><span class="tok-n">CV_RGB</span><span class="tok-p">(</span><span class="tok-n">red</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">green</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">blue</span><span class="tok-p">),</span>
+<span class="tok-w">                               </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">FILLED</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">LINE_AA</span><span class="tok-p">);</span>
+<span class="tok-w">                </span><span class="tok-p">}</span>
+<span class="tok-w">            </span><span class="tok-p">}</span>
+<span class="tok-w">        </span><span class="tok-p">}</span>
+<span class="tok-w">        </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imshow</span><span class="tok-p">(</span><span class="tok-s">&quot;Point&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">points</span><span class="tok-p">);</span>
+<span class="tok-w">        </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">(</span><span class="tok-mi">100</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-p">}</span>
+
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">waitKey</span><span class="tok-p">();</span>
+<span class="tok-w">    </span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">imwrite</span><span class="tok-p">(</span><span class="tok-s">&quot;pontilism.png&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">points</span><span class="tok-p">);</span>
+<span class="tok-w">    </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-mi">0</span><span class="tok-p">;</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>O processo de pintura foi capturado no gif abaixo:</p>
+</div>
+<div id="fig_pgif" class="imageblock">
+<div class="content">
+<img src="images/Arvre%20Point.gif" alt="Arvre Point">
+</div>
+<div class="title">Figure 18. As pinturas do programa pontilhismo</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-11-20 09:26:27 -0300
+Last updated 2023-11-20 09:52:51 -0300
 </div>
 </div>
 <script type="text/x-mathjax-config">
